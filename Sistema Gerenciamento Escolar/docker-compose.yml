@@ -1,16 +1,18 @@
-version: '3.8'
 
 services:
   postgres:
-    image: postgres:latest
-    container_name: postgres_school_db
+    build:
+      context: ./BD
+      dockerfile: dockerfile
+    container_name: postgres_escola
     restart: always
     environment:
-      POSTGRES_DB: school_db
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: secretpassword
+      DATA_SOURCE_NAME: "postgresql://faat:faat@postgres_escola:5432/Escola?sslmode=disable"
+      POSTGRES_DB: Escola
+      POSTGRES_USER: faat
+      POSTGRES_PASSWORD: faat
     ports:
-      - "5432:5432"
+      - "2000:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 
@@ -28,7 +30,7 @@ services:
     container_name: prometheus
     restart: always
     volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
 
