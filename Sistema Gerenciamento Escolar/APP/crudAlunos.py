@@ -1,7 +1,10 @@
+from flask import Flask, request, jsonify
+from flasgger import Swagger
+from prometheus_flask_exporter import PrometheusMetrics
+from prometheus_client import Counter
+import Util.bd as bd
 import logging
 import psycopg2
-from flask import Flask, request, jsonify
-import Util.bd as bd
 from error_handler import handle_db_error, handle_application_error
 
 # Configuração do logging
@@ -14,11 +17,38 @@ logger = logging.getLogger()
 
 app = Flask(__name__)
 
-def handle_db_error(error, operacao, aluno_id=None):
-    """Função para capturar erros, registrar logs e retornar resposta padronizada."""
-    mensagem = f"{operacao} - Aluno ID: {aluno_id if aluno_id else 'N/A'} - ERRO: {str(error)}"
-    logger.error(mensagem)
-    return jsonify({"error": "Erro no banco de dados"}), 500
+# Configuração do Swagger
+swagger = Swagger(app)
+
+# Configuração do Prometheus
+metrics = PrometheusMetrics(app, default_labels={'app_name': 'escola_infantil_app'})
+
+# Métricas personalizadas para sucessos e erros
+success_counter = Counter(
+    'http_success_count', 'Contagem de respostas HTTP com sucesso',
+    ['endpoint', 'method', 'status']
+)
+
+error_counter = Counter(
+    'http_error_count', 'Contagem de respostas HTTP com erro',
+    ['endpoint', 'method', 'status']
+)
+
+@app.after_request
+def after_request(response):
+    """
+    Middleware para capturar os retornos de todos os endpoints.
+    """
+    endpoint = request.path
+    method = request.method
+    status = response.status_code
+
+    if 200 <= status < 300:
+        success_counter.labels(endpoint=endpoint, method=method, status=str(status)).inc()
+    else:
+        error_counter.labels(endpoint=endpoint, method=method, status=str(status)).inc()
+
+    return response
 
 @app.route('/alunos', methods=['POST'])
 def create_aluno():
@@ -123,7 +153,7 @@ def delete_aluno(aluno_id):
     
     cursor = conn.cursor()
     try:
-        cursor.execute("DELETE FROM public.\"Alunos\" WHERE aluno_id = %s;", (aluno_id,))
+        cursor.execute("DELETE FROM public."Alunos" WHERE aluno_id = %s;", (aluno_id,))
         conn.commit()
         logger.info(f"DELETE - Aluno ID: {aluno_id} - Status: SUCESSO")
         return jsonify({"message": "Aluno deletado com sucesso"}), 200

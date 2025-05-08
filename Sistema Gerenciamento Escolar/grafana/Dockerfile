@@ -1,3 +1,3 @@
 FROM grafana/grafana:latest
 
-COPY custom.ini /etc/grafana/grafana.ini
+COPY dashboards/example-dashboard.json /var/lib/grafana/dashboards/example-dashboard.json

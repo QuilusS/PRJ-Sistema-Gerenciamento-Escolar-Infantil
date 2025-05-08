@@ -45,7 +45,7 @@ Você pode se conectar ao PostgreSQL utilizando um cliente PostgreSQL, como **DB
 
 - **Host:** `localhost`
 - **Porta:** `2000`
-- **Banco de Dados:** `northwind`
+- **Banco de Dados:** `Escola`
 - **Usuário:** `faat`
 - **Senha:** `faat`
 

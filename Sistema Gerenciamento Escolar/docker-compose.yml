@@ -21,7 +21,7 @@ services:
     container_name: postgres_exporter
     restart: always
     environment:
-      DATA_SOURCE_NAME: "postgresql://admin:secretpassword@postgres_school_db:5432/school_db?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://admin:secretpassword@postgres_escola:5432/school_db?sslmode=disable"
     ports:
       - "9187:9187"
 
